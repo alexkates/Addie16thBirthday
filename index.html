@@ -90,6 +90,9 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 .playbox{background:rgba(255,255,255,.06);border:2px solid #4a2f70;border-radius:18px;padding:14px}
 .playbox p{margin:0 0 10px;text-align:center;font-family:var(--display);font-size:12px;letter-spacing:.12em;color:var(--tape)}
 .playbox iframe{border-radius:12px;display:block;width:100%;border:0}
+.playbox.tapme{border-color:var(--pink);animation:nudge 1.15s ease-in-out infinite}
+.playbox.tapme p{color:var(--pink)}
+@keyframes nudge{50%{box-shadow:0 0 0 7px rgba(255,61,154,.20)}}
 
 /* TICKET */
 .ticket{position:relative;background:var(--cream);color:#1a0b2e;border:3px solid #111;border-radius:14px;
@@ -426,11 +429,18 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   function rain(times){ var n=0,id=setInterval(function(){ burst(26,Math.random()*innerWidth,-20,5); if(++n>=times) clearInterval(id); },260); }
 
   /* ---------- spotify ---------- */
-  var TRACK='4ZtFanR9U6ndgddUvNcjcG', spotCtrl=null, spotReady=false;
+  var TRACK='4ZtFanR9U6ndgddUvNcjcG', spotCtrl=null, spotReady=false, spotPlaying=false, primed=false;
+  var playbox=document.querySelector('.playbox'), playlab=playbox.querySelector('p');
   window.onSpotifyIframeApiReady=function(api){
     api.createController(document.getElementById('spot'),
       {uri:'spotify:track:'+TRACK,width:'100%',height:152},
-      function(c){ spotCtrl=c; spotReady=true; });
+      function(c){
+        spotCtrl=c; spotReady=true;
+        c.addListener('playback_update',function(e){
+          spotPlaying=!!(e&&e.data&&!e.data.isPaused&&e.data.position>0);
+          if(spotPlaying){ playbox.classList.remove('tapme'); playlab.textContent='\u25B6 PRESS PLAY. LOUD.'; }
+        });
+      });
   };
   (function(){
     var sc=document.createElement('script');
@@ -441,9 +451,25 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       if(!spotReady && !host.firstChild){
         host.innerHTML='<iframe title="good 4 u on Spotify" src="https://open.spotify.com/embed/track/'+TRACK+'?theme=0" width="100%" height="152" allow="autoplay; encrypted-media" loading="lazy"></iframe>';
       }
-    },3500);
+    },9000);
   })();
-  function playSong(){ try{ if(spotCtrl) spotCtrl.play(); }catch(e){} }
+  function needsTap(){
+    if(spotPlaying) return;
+    playbox.classList.add('tapme');
+    playlab.textContent='\u25B6 TAP PLAY TO START THE SONG';
+  }
+  /* iOS will only start media from inside a gesture, so wake the player during
+     the envelope tap and park it back at zero until the reveal lands */
+  function primeSong(){
+    if(primed||!spotCtrl) return; primed=true;
+    try{ spotCtrl.play(); spotCtrl.pause(); spotCtrl.seek(0); }catch(e){}
+  }
+  function playSong(){
+    if(!spotCtrl){ needsTap(); return; }
+    try{ spotCtrl.play(); }catch(e){}
+    setTimeout(function(){ if(!spotPlaying){ try{ spotCtrl.play(); }catch(e){} } },800);
+    setTimeout(needsTap,2200);
+  }
 
   /* ---------- chime ---------- */
   var AC=window.AudioContext||window.webkitAudioContext, ac=null;
@@ -458,6 +484,12 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     o.start(ac.currentTime+t); o.stop(ac.currentTime+t+dur+0.05);
   }
   function chime(){ [784,988,1319].forEach(function(f,i){ note(f,i*0.09,.45); }); }
+  /* the AudioContext is opened by the tap, so this always sounds even when the
+     cross-origin Spotify frame refuses to autoplay */
+  function fanfare(){
+    [[523,0],[659,.09],[784,.18],[1047,.27]].forEach(function(p){ note(p[0],p[1],.5,'triangle',.12); });
+    note(1319,.36,.85,'sine',.09); note(262,0,.9,'sine',.06);
+  }
 
   /* ---------- sequence ---------- */
   var LINES=[
@@ -484,6 +516,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     hint.classList.remove('hide');
     burst(180,innerWidth/2,innerHeight*0.55,13);
     rain(7);
+    fanfare();
     playSong();
     T(function(){ hint.classList.add('hide'); },7000);
   }
@@ -491,14 +524,14 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     gate.classList.add('gone');
     stage.classList.add('on');
     skip.classList.add('on');
-    var step=reduce?600:1650;
+    var step=reduce?600:2200;
     LINES.forEach(function(html,i){
       T(function(){
         lineEl.className='line'; lineEl.innerHTML=html;
         void lineEl.offsetWidth; lineEl.classList.add('in');
         note(440+i*70,0,.18,'sine',.06);
       }, i*step);
-      T(function(){ lineEl.classList.add('out'); }, i*step+step-320);
+      T(function(){ lineEl.classList.add('out'); }, i*step+step-420);
     });
     T(finish, LINES.length*step+220);
   }
@@ -507,6 +540,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     if(opened) return; opened=true;
     if(!ac&&AC){ try{ ac=new AC(); }catch(e){} }
     chime();
+    primeSong();
     burst(90,innerWidth/2,innerHeight*0.5,9);
     T(play,420);
   }
