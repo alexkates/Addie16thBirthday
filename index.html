@@ -503,8 +503,30 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     hint.classList.remove('hide');
     burst(180,innerWidth/2,innerHeight*0.55,13);
     rain(7);
-    playSong();
+    fanfare();
     T(function(){ hint.classList.add('hide'); },7000);
+    /* wait for the ticket. An IntersectionObserver only calls back when the
+       ratio crosses a threshold: on a tall phone the ticket already clears
+       60% visible before any scroll happens, that first (correctly ignored,
+       no scroll yet) callback is the only time isIntersecting is ever true,
+       and the next callback is it dropping back below 60% as she scrolls
+       PAST it -- isIntersecting false, so it never fires again. A direct
+       geometry check on scroll has no such crossing to miss. */
+    function ticketVisibleEnough(){
+      var r=ticketEl.getBoundingClientRect();
+      var visible=Math.min(r.bottom,innerHeight)-Math.max(r.top,0);
+      return visible/r.height>=.6;
+    }
+    var ticketEl=document.querySelector('.ticket'), ticking=false;
+    function checkTicket(){
+      ticking=false;
+      if(scrollY>0 && ticketVisibleEnough()){
+        removeEventListener('scroll',onScroll);
+        playSong();
+      }
+    }
+    function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(checkTicket); } }
+    addEventListener('scroll',onScroll,{passive:true});
   }
   function play(){
     gate.classList.add('gone');
