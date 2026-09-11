@@ -460,6 +460,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   var AC=window.AudioContext||window.webkitAudioContext, ac=null;
   function note(f,t,dur,type,vol){
     if(!ac) return;
+    if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
     var o=ac.createOscillator(), g=ac.createGain();
     o.type=type||'triangle'; o.frequency.value=f;
     g.gain.setValueAtTime(0,ac.currentTime+t);
@@ -534,6 +535,19 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   function open(){
     if(opened) return; opened=true;
     if(!ac&&AC){ try{ ac=new AC(); }catch(e){} }
+    /* iOS creates a fresh AudioContext suspended even inside a real tap; it has
+       to be resumed in the same gesture or every oscillator plays silently */
+    if(ac&&ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
+    /* same for the <audio> element: play() then pause() immediately, inside
+       this gesture, unlocks it so the deferred play() at the reveal (~20s
+       later) is honored instead of silently refused */
+    try{
+      var pr=audio.play();
+      /* the priming blip fires the real 'play' event, which marks songOn=true;
+         reset it after so a later silent failure still shows the tap cue */
+      if(pr&&pr.then) pr.then(function(){ audio.pause(); audio.currentTime=0; songOn=false; }).catch(function(){});
+      else { audio.pause(); audio.currentTime=0; songOn=false; }
+    }catch(e){}
     chime();
     burst(90,innerWidth/2,innerHeight*0.5,9);
     T(play,420);
