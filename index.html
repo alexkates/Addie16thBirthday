@@ -63,11 +63,11 @@ canvas#confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
 #stage.on{display:flex}
 #stage.clear{background:transparent;pointer-events:none;opacity:0;transition:opacity .8s .3s ease}
 .line{font-family:var(--display);font-size:clamp(30px,9vw,60px);line-height:1.18;max-width:17ch;margin:0;
-  opacity:0;transform:translateY(18px) scale(.96)}
-.line.in{animation:pop .5s cubic-bezier(.2,1.6,.4,1) forwards}
-.line.out{animation:zip .35s ease forwards}
-@keyframes pop{to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes zip{to{opacity:0;transform:translateY(-22px) scale(1.04)}}
+  opacity:0;transform:perspective(700px) rotateY(-90deg) scale(.96);backface-visibility:hidden}
+.line.in{animation:flipin .55s cubic-bezier(.2,1.15,.35,1) forwards}
+.line.out{animation:flipout .4s ease forwards}
+@keyframes flipin{to{opacity:1;transform:perspective(700px) rotateY(0) scale(1)}}
+@keyframes flipout{to{opacity:0;transform:perspective(700px) rotateY(90deg) scale(.96)}}
 .line em{font-style:normal;color:var(--lime)}
 .line .sub{display:block;font-family:var(--hand);font-size:.6em;line-height:1.14;color:#c9b6e6;
   margin-top:.42em;opacity:0;transform:translateY(12px)}
@@ -105,6 +105,9 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 /* TICKET */
 .ticket{position:relative;background:var(--cream);color:#1a0b2e;border:3px solid #111;border-radius:14px;
   padding:22px 20px 18px;box-shadow:0 22px 44px rgba(0,0,0,.5);transform:rotate(-1.4deg)}
+.reveal-ticket{display:none;width:min(92vw,620px);opacity:0;transform:perspective(900px) rotateY(-90deg) scale(.82)}
+.reveal-ticket.on{display:block;animation:ticketin .85s cubic-bezier(.16,1.35,.35,1) forwards}
+@keyframes ticketin{to{opacity:1;transform:perspective(900px) rotateY(0) scale(1)}}
 .ticket::before,.ticket::after{content:"";position:absolute;width:26px;height:26px;background:var(--ink);
   border:3px solid #111;border-radius:50%;top:50%;margin-top:-13px}
 .ticket::before{left:-16px}
@@ -201,7 +204,24 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   <p class="gate-warn">sound on. all the way up.</p>
 </div>
 
-<div id="stage"><h2 class="line" id="line"></h2></div>
+<div id="stage">
+  <h2 class="line" id="line"></h2>
+  <div class="ticket reveal-ticket" id="revealTicket" aria-label="Two tickets to see Olivia Rodrigo on November 7">
+    <div class="bulbs top"></div>
+    <div class="bulbs bot"></div>
+    <div class="t-top"><span>ADMIT TWO</span><span>NO. 016</span></div>
+    <p class="t-tour">Live in concert</p>
+    <h3 class="t-act">OLIVIA<br>RODRIGO</h3>
+    <hr class="t-rule">
+    <div class="t-grid">
+      <div><p class="t-lab">Date</p><p class="t-val">NOV 7</p></div>
+      <div><p class="t-lab">Guest</p><p class="t-val">ADDIE</p></div>
+      <div><p class="t-lab">Chaperone</p><p class="t-val">AUNT SAM</p></div>
+    </div>
+    <div class="barcode"></div>
+    <p class="t-fine">Non-refundable • Voice loss not covered</p>
+  </div>
+</div>
 
 <main id="main">
 
@@ -363,21 +383,21 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   function mk(base,extra){ var o={},k; for(k in base)o[k]=base[k]; for(k in extra||{})o[k]=extra[k]; return o; }
 
   var SCENES=[
-    {cap:'santa hat era, still going',
-     a:mk(SAM,{shirt:'#9aa3ad',left:{up:true,hold:'glow'},right:{up:true}}),
-     b:mk(ADDIE,{shirt:'#e8eef5',hat:true,left:{up:true},right:{up:true,hold:'glow'}})},
-    {cap:'matching flower necklaces, obviously',
-     a:mk(SAM,{shirt:'#12263f',dots:'#4fb0e8',necklace:'#ff6b6b',left:{up:true},right:{up:true,hold:'glow'}}),
-     b:mk(ADDIE,{shirt:'#fbf6ec',necklace:'#5ad07a',left:{up:true,hold:'glow'},right:{up:true}})},
-    {cap:'sunglasses. indoors. unbothered.',
-     a:mk(SAM,{shirt:'#7c2436',shades:true,left:{up:true},right:{up:true,hold:'glow'}}),
-     b:mk(ADDIE,{shirt:'#ffffff',gown:true,shades:true,lens:'#f5a623',left:{up:true,hold:'glow'},right:{up:true}})},
-    {cap:'snacks smuggled in, do not ask',
-     a:mk(SAM,{shirt:'#b9bfc7',bun:true,wavy:false,scrunchie:'#dfe6f0',left:{hold:'cookie'},right:{up:true,hold:'glow'}}),
-     b:mk(ADDIE,{shirt:'#1e2a55',left:{up:true,hold:'peace'},right:{up:true,hold:'peace'}})},
-    {cap:'row SINGING, seat EVERY WORD',
-     a:mk(SAM,{shirt:'#7c2436',dots:'#e8dccb',left:{up:true,hold:'phone'},right:{up:true}}),
-     b:mk(ADDIE,{shirt:'#3b2b3f',left:{up:true},right:{up:true,hold:'phone'}})}
+    {cap:'before the show',
+     a:mk(SAM,{shirt:'#ff3d9a',left:{up:true,hold:'phone'},right:{up:true,hold:'peace'}}),
+     b:mk(ADDIE,{shirt:'#ccff33',left:{up:true,hold:'peace'},right:{up:true,hold:'phone'}})},
+    {cap:'vampire',
+     a:mk(SAM,{shirt:'#291447',dots:'#ff3d9a',left:{up:true,hold:'glow'},right:{up:true}}),
+     b:mk(ADDIE,{shirt:'#fff4e6',necklace:'#ff3d9a',left:{up:true},right:{up:true,hold:'glow'}})},
+    {cap:'get him back!',
+     a:mk(SAM,{shirt:'#7c2436',shades:true,lens:'#ccff33',left:{up:true},right:{up:true,hold:'glow'}}),
+     b:mk(ADDIE,{shirt:'#8b3dff',shades:true,lens:'#ff3d9a',left:{up:true,hold:'glow'},right:{up:true}})},
+    {cap:'intermission',
+     a:mk(SAM,{shirt:'#ffe45c',bun:true,wavy:false,scrunchie:'#ff3d9a',left:{hold:'cookie'},right:{up:true,hold:'peace'}}),
+     b:mk(ADDIE,{shirt:'#1e2a55',left:{up:true,hold:'cookie'},right:{up:true,hold:'peace'}})},
+    {cap:'the encore',
+     a:mk(SAM,{shirt:'#ff3d9a',dots:'#ffe45c',left:{up:true,hold:'phone'},right:{up:true,hold:'glow'}}),
+     b:mk(ADDIE,{shirt:'#3b2b3f',necklace:'#ccff33',left:{up:true,hold:'glow'},right:{up:true,hold:'phone'}})}
   ];
 
   var rows=document.getElementById('rows');
@@ -443,8 +463,17 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   /* ---------- song ---------- */
   var audio=document.getElementById('song'), playbox=document.querySelector('.playbox'),
       pp=document.getElementById('pp'), prog=document.getElementById('prog'), songOn=false;
+  var audioReady=false;
   function needsTap(){ if(!songOn) playbox.classList.add('tapme'); }
   function playSong(){
+    audio.currentTime=0;
+    audio.muted=false;
+    if(audioReady && !audio.paused){
+      songOn=true;
+      pp.textContent='\u275A\u275A';
+      playbox.classList.remove('tapme');
+      return;
+    }
     var pr;
     try{ pr=audio.play(); }catch(e){ fanfare(); needsTap(); return; }
     if(pr&&pr.then){ pr.then(function(){ songOn=true; }).catch(function(){ fanfare(); needsTap(); }); }
@@ -493,40 +522,24 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   var timers=[], done=false;
   function T(fn,ms){ timers.push(setTimeout(fn,ms)); }
 
-  function finish(){
+  function revealTicket(){
     if(done) return; done=true;
     timers.forEach(clearTimeout); timers=[];
+    lineEl.className='line';
+    lineEl.hidden=true;
+    document.getElementById('revealTicket').classList.add('on');
+    playSong();
+    burst(180,innerWidth/2,innerHeight*0.55,13);
+    rain(7);
+    T(finish,4200);
+  }
+  function finish(){
     stage.classList.add('clear');
     T(function(){ stage.classList.remove('on','clear'); },1400);
     main.classList.add('on');
     document.body.classList.remove('locked');
     hint.classList.remove('hide');
-    burst(180,innerWidth/2,innerHeight*0.55,13);
-    rain(7);
-    fanfare();
     T(function(){ hint.classList.add('hide'); },7000);
-    /* wait for the ticket. An IntersectionObserver only calls back when the
-       ratio crosses a threshold: on a tall phone the ticket already clears
-       60% visible before any scroll happens, that first (correctly ignored,
-       no scroll yet) callback is the only time isIntersecting is ever true,
-       and the next callback is it dropping back below 60% as she scrolls
-       PAST it -- isIntersecting false, so it never fires again. A direct
-       geometry check on scroll has no such crossing to miss. */
-    function ticketVisibleEnough(){
-      var r=ticketEl.getBoundingClientRect();
-      var visible=Math.min(r.bottom,innerHeight)-Math.max(r.top,0);
-      return visible/r.height>=.6;
-    }
-    var ticketEl=document.querySelector('.ticket'), ticking=false;
-    function checkTicket(){
-      ticking=false;
-      if(scrollY>0 && ticketVisibleEnough()){
-        removeEventListener('scroll',onScroll);
-        playSong();
-      }
-    }
-    function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(checkTicket); } }
-    addEventListener('scroll',onScroll,{passive:true});
   }
   function play(){
     gate.classList.add('gone');
@@ -551,7 +564,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       T(function(){ lineEl.classList.add('out'); }, start+dur-420);
       at+=dur;
     });
-    T(finish, at+220);
+    T(revealTicket, at+220);
   }
   var opened=false;
   function open(){
@@ -560,15 +573,14 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     /* iOS creates a fresh AudioContext suspended even inside a real tap; it has
        to be resumed in the same gesture or every oscillator plays silently */
     if(ac&&ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
-    /* same for the <audio> element: play() then pause() immediately, inside
-       this gesture, unlocks it so the deferred play() at the reveal (~20s
-       later) is honored instead of silently refused */
+    /* Keep the media stream running silently after the tap. Mobile Safari can
+       reject a new play request after the teaser delay, but it allows this
+       already-authorized stream to unmute at the ticket reveal. */
     try{
+      audio.muted=true;
       var pr=audio.play();
-      /* the priming blip fires the real 'play' event, which marks songOn=true;
-         reset it after so a later silent failure still shows the tap cue */
-      if(pr&&pr.then) pr.then(function(){ audio.pause(); audio.currentTime=0; songOn=false; }).catch(function(){});
-      else { audio.pause(); audio.currentTime=0; songOn=false; }
+      if(pr&&pr.then) pr.then(function(){ audioReady=true; songOn=false; }).catch(function(){});
+      else { audioReady=true; songOn=false; }
     }catch(e){}
     chime();
     burst(90,innerWidth/2,innerHeight*0.5,9);
