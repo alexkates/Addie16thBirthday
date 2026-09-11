@@ -87,11 +87,19 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 
 /* PLAYER */
 .player{max-width:660px;margin:0 auto;padding:0 20px}
-.playbox{background:rgba(255,255,255,.06);border:2px solid #4a2f70;border-radius:18px;padding:14px}
-.playbox p{margin:0 0 10px;text-align:center;font-family:var(--display);font-size:14px;letter-spacing:.12em;color:var(--tape)}
-.playbox iframe{border-radius:12px;display:block;width:100%;border:0}
+.playbox{background:rgba(255,255,255,.06);border:2px solid #4a2f70;border-radius:18px;padding:14px;
+  display:flex;align-items:center;gap:14px}
+.pp{flex:0 0 auto;width:60px;height:60px;border-radius:50%;border:3px solid #111;background:var(--lime);
+  color:#150726;font-family:var(--display);font-size:20px;line-height:1;padding:0;cursor:pointer;
+  display:grid;place-items:center;box-shadow:0 5px 0 #111}
+.pp:active{transform:translateY(3px);box-shadow:0 2px 0 #111}
+.meta{flex:1 1 auto;min-width:0}
+.meta b{display:block;font-family:var(--display);font-size:18px;font-weight:400;color:var(--cream);line-height:1.1}
+.meta span{display:block;font-size:13px;letter-spacing:.10em;text-transform:uppercase;color:#b39ddb;margin-top:4px}
+.bar{margin-top:10px;height:7px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--lime),var(--pink))}
 .playbox.tapme{border-color:var(--pink);animation:nudge 1.15s ease-in-out infinite}
-.playbox.tapme p{color:var(--pink)}
+.playbox.tapme .pp{background:var(--pink);color:#fff}
 @keyframes nudge{50%{box-shadow:0 0 0 7px rgba(255,61,154,.20)}}
 
 /* TICKET */
@@ -206,10 +214,15 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 
   <div class="player">
     <div class="playbox">
-      <p>▶ PRESS PLAY. LOUD.</p>
-      <div id="spot"></div>
+      <button class="pp" id="pp" type="button" aria-label="Play or pause the song">▶</button>
+      <div class="meta">
+        <b>good 4 u</b>
+        <span>Olivia Rodrigo</span>
+        <div class="bar"><i id="prog"></i></div>
+      </div>
     </div>
   </div>
+  <audio id="song" src="good-4-u.m4a" preload="auto" loop playsinline></audio>
 
   <section>
     <div class="ticket">
@@ -428,48 +441,21 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   }
   function rain(times){ var n=0,id=setInterval(function(){ burst(26,Math.random()*innerWidth,-20,5); if(++n>=times) clearInterval(id); },260); }
 
-  /* ---------- spotify ---------- */
-  var TRACK='4ZtFanR9U6ndgddUvNcjcG', spotCtrl=null, spotReady=false, spotPlaying=false, primed=false;
-  var playbox=document.querySelector('.playbox'), playlab=playbox.querySelector('p');
-  window.onSpotifyIframeApiReady=function(api){
-    api.createController(document.getElementById('spot'),
-      {uri:'spotify:track:'+TRACK,width:'100%',height:152},
-      function(c){
-        spotCtrl=c; spotReady=true;
-        c.addListener('playback_update',function(e){
-          spotPlaying=!!(e&&e.data&&!e.data.isPaused&&e.data.position>0);
-          if(spotPlaying){ playbox.classList.remove('tapme'); playlab.textContent='\u25B6 PRESS PLAY. LOUD.'; }
-        });
-      });
-  };
-  (function(){
-    var sc=document.createElement('script');
-    sc.src='https://open.spotify.com/embed/iframe-api/v1'; sc.async=true;
-    document.head.appendChild(sc);
-    setTimeout(function(){
-      var host=document.getElementById('spot');
-      if(!spotReady && !host.firstChild){
-        host.innerHTML='<iframe title="good 4 u on Spotify" src="https://open.spotify.com/embed/track/'+TRACK+'?theme=0" width="100%" height="152" allow="autoplay; encrypted-media" loading="lazy"></iframe>';
-      }
-    },9000);
-  })();
-  function needsTap(){
-    if(spotPlaying) return;
-    playbox.classList.add('tapme');
-    playlab.textContent='\u25B6 TAP PLAY TO START THE SONG';
-  }
-  /* iOS will only start media from inside a gesture, so wake the player during
-     the envelope tap and park it back at zero until the reveal lands */
-  function primeSong(){
-    if(primed||!spotCtrl) return; primed=true;
-    try{ spotCtrl.play(); spotCtrl.pause(); spotCtrl.seek(0); }catch(e){}
-  }
+  /* ---------- song ---------- */
+  var audio=document.getElementById('song'), playbox=document.querySelector('.playbox'),
+      pp=document.getElementById('pp'), prog=document.getElementById('prog'), songOn=false;
+  function needsTap(){ if(!songOn) playbox.classList.add('tapme'); }
   function playSong(){
-    if(!spotCtrl){ needsTap(); return; }
-    try{ spotCtrl.play(); }catch(e){}
-    setTimeout(function(){ if(!spotPlaying){ try{ spotCtrl.play(); }catch(e){} } },800);
-    setTimeout(needsTap,2200);
+    var pr;
+    try{ pr=audio.play(); }catch(e){ fanfare(); needsTap(); return; }
+    if(pr&&pr.then){ pr.then(function(){ songOn=true; }).catch(function(){ fanfare(); needsTap(); }); }
   }
+  pp.addEventListener('click',function(){ if(audio.paused){ audio.play(); } else { audio.pause(); } });
+  audio.addEventListener('play',function(){ songOn=true; pp.textContent='\u275A\u275A'; playbox.classList.remove('tapme'); });
+  audio.addEventListener('pause',function(){ pp.textContent='\u25B6'; });
+  audio.addEventListener('timeupdate',function(){
+    if(audio.duration) prog.style.width=(audio.currentTime/audio.duration*100)+'%';
+  });
 
   /* ---------- chime ---------- */
   var AC=window.AudioContext||window.webkitAudioContext, ac=null;
@@ -516,7 +502,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     hint.classList.remove('hide');
     burst(180,innerWidth/2,innerHeight*0.55,13);
     rain(7);
-    fanfare();
+    playSong();
     T(function(){ hint.classList.add('hide'); },7000);
   }
   function play(){
@@ -539,7 +525,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     if(opened) return; opened=true;
     if(!ac&&AC){ try{ ac=new AC(); }catch(e){} }
     chime();
-    primeSong();
     burst(90,innerWidth/2,innerHeight*0.5,9);
     T(play,420);
   }
@@ -561,11 +546,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   }
   clock(); setInterval(clock,1000);
 
-  /* the song holds until she reaches the ticket */
-  var tio=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ tio.disconnect(); playSong(); } });
-  },{threshold:.35});
-  tio.observe(document.querySelector('.ticket'));
 
   /* ---------- reveals ---------- */
   var io=new IntersectionObserver(function(es){
