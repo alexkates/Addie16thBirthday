@@ -73,10 +73,6 @@ canvas#confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
   margin-top:.42em;opacity:0;transform:translateY(12px)}
 .line .sub.in{animation:subin .45s ease forwards}
 @keyframes subin{to{opacity:1;transform:translateY(0)}}
-#skip{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:75;font-size:13px;
-  letter-spacing:.2em;text-transform:uppercase;color:#a892c9;background:none;border:1px solid #4a2f70;
-  border-radius:99px;padding:8px 14px;cursor:pointer;display:none}
-#skip.on{display:block}
 
 main{position:relative;z-index:2;opacity:0;transition:opacity .7s ease}
 main.on{opacity:1}
@@ -206,7 +202,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 </div>
 
 <div id="stage"><h2 class="line" id="line"></h2></div>
-<button id="skip">skip →</button>
 
 <main id="main">
 
@@ -493,14 +488,13 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   ];
   var stage=document.getElementById('stage'), lineEl=document.getElementById('line');
   var gate=document.getElementById('gate'), main=document.getElementById('main');
-  var hint=document.getElementById('hint'), skip=document.getElementById('skip');
+  var hint=document.getElementById('hint');
   var timers=[], done=false;
   function T(fn,ms){ timers.push(setTimeout(fn,ms)); }
 
   function finish(){
     if(done) return; done=true;
     timers.forEach(clearTimeout); timers=[];
-    skip.classList.remove('on');
     stage.classList.add('clear');
     T(function(){ stage.classList.remove('on','clear'); },1400);
     main.classList.add('on');
@@ -514,7 +508,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   function play(){
     gate.classList.add('gone');
     stage.classList.add('on');
-    skip.classList.add('on');
     var step=reduce?600:3000, at=0;
     LINES.forEach(function(L,i){
       var start=at, dur=step+(reduce?0:(L.hold||0));
@@ -548,7 +541,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   var env=document.getElementById('envelope');
   env.addEventListener('click',open);
   env.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); }});
-  skip.addEventListener('click',finish);
 
   /* ---------- countdown ---------- */
   var target=new Date(2026,10,7,19,0,0).getTime();
