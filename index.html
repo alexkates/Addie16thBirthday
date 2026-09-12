@@ -272,7 +272,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     <p class="kicker">NOVEMBER 7, 2026 &nbsp;•&nbsp; PHILADELPHIA</p>
     <h2 class="bigname"><span class="shake">OLIVIA<br>RODRIGO</span></h2>
     <p class="tour-script">the unraveled tour</p>
-    <p class="subline">you + aunt sam. xfinity mobile arena. 7:00 pm. devon again opens.</p>
+    <p class="subline">you + aunt sam. xfinity mobile arena. 7:00 pm.</p>
   </section>
 
   <div class="player">
@@ -286,6 +286,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     </div>
   </div>
   <audio id="song" src="good-4-u.m4a" preload="auto" loop playsinline></audio>
+  <audio id="beep" src="teaser-beep.wav" preload="auto" playsinline></audio>
 
   <section>
     <div class="ticket">
@@ -547,34 +548,18 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     if(audio.duration) prog.style.width=(audio.currentTime/audio.duration*100)+'%';
   });
 
-  /* ---------- chime ---------- */
-  var AC=window.AudioContext||window.webkitAudioContext, ac=null;
-  function note(f,t,dur,type,vol){
-    if(!ac) return;
-    function schedule(){
-      var o=ac.createOscillator(), g=ac.createGain(), now=ac.currentTime;
-      o.type=type||'triangle'; o.frequency.value=f;
-      g.gain.setValueAtTime(0,now+t);
-      g.gain.linearRampToValueAtTime(vol||0.14,now+t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,now+t+dur);
-      o.connect(g); g.connect(ac.destination);
-      o.start(now+t); o.stop(now+t+dur+0.05);
-    }
-    if(ac.state==='running') schedule();
-    else {
-      try{
-        var resumed=ac.resume();
-        if(resumed&&resumed.then) resumed.then(schedule).catch(function(){});
-      }catch(e){}
-    }
+  /* ---------- cue ---------- */
+  var beep=document.getElementById('beep');
+  function playBeep(){
+    try{
+      beep.pause();
+      beep.currentTime=0;
+      beep.muted=false;
+      var pr=beep.play();
+      if(pr&&pr.catch) pr.catch(function(){});
+    }catch(e){}
   }
-  function chime(){ [784,988,1319].forEach(function(f,i){ note(f,i*0.09,.45); }); }
-  /* the AudioContext is opened by the tap, so this always sounds even when the
-     cross-origin Spotify frame refuses to autoplay */
-  function fanfare(){
-    [[523,0],[659,.09],[784,.18],[1047,.27]].forEach(function(p){ note(p[0],p[1],.5,'triangle',.12); });
-    note(1319,.36,.85,'sine',.09); note(262,0,.9,'sine',.06);
-  }
+  function fanfare(){ playBeep(); }
 
   /* ---------- sequence ---------- */
   var LINES=[
@@ -614,7 +599,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       lineEl.textContent=n;
       void lineEl.offsetWidth;
       lineEl.classList.add('in');
-      note(330+(3-n)*110,0,.22,'sine',.08);
+      playBeep();
     }
     showCount(3);
     T(function(){ showCount(2); },beat);
@@ -628,7 +613,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     function showLine(L,i){
       lineEl.className='line'; lineEl.innerHTML=L.t;
       void lineEl.offsetWidth; lineEl.classList.add('in');
-      note(440+i*70,0,.18,'sine',.06);
+      playBeep();
     }
     LINES.forEach(function(L,i){
       var start=at, dur=step+(reduce?0:(L.hold||0));
@@ -640,7 +625,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
           sp.className='sub'; sp.innerHTML=L.sub;
           lineEl.appendChild(sp);
           void sp.offsetWidth; sp.classList.add('in');
-          note(330,0,.22,'sine',.05);
+          playBeep();
         }, start+(reduce?200:1000));
       }
       T(function(){ lineEl.classList.add('out'); }, start+dur-420);
@@ -656,10 +641,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   }
   function confirmSound(){
     var soundcheck=document.getElementById('soundcheck');
-    if(!ac&&AC){ try{ ac=new AC(); }catch(e){} }
-    /* iOS creates a fresh AudioContext suspended even inside a real tap; it has
-       to be resumed in the same gesture or every oscillator plays silently */
-    if(ac&&ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
     /* Keep the media stream running silently after the tap. Mobile Safari can
        reject a new play request after the teaser delay, but it allows this
        already-authorized stream to unmute at the ticket reveal. */
@@ -669,7 +650,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       if(pr&&pr.then) pr.then(function(){ audioReady=true; songOn=false; }).catch(function(){});
       else { audioReady=true; songOn=false; }
     }catch(e){}
-    chime();
+    playBeep();
     countIn();
     soundcheck.hidden=true;
   }
