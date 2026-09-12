@@ -74,6 +74,7 @@ canvas#confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
   opacity:0;transform:perspective(700px) rotateY(-90deg) scale(.96);backface-visibility:hidden}
 .line.in{animation:flipin .55s cubic-bezier(.2,1.15,.35,1) forwards}
 .line.out{animation:flipout .4s ease forwards}
+.line.count{font-size:clamp(120px,44vw,300px);line-height:1;color:var(--lime);text-shadow:8px 8px 0 var(--pink)}
 @keyframes flipin{to{opacity:1;transform:perspective(700px) rotateY(0) scale(1)}}
 @keyframes flipout{to{opacity:0;transform:perspective(700px) rotateY(90deg) scale(.96)}}
 .line em{font-style:normal;color:var(--lime)}
@@ -564,6 +565,21 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     hint.classList.remove('hide');
     T(function(){ hint.classList.add('hide'); },7000);
   }
+  function countIn(){
+    var beat=reduce?450:850;
+    stage.classList.add('on');
+    function showCount(n){
+      lineEl.className='line count';
+      lineEl.textContent=n;
+      void lineEl.offsetWidth;
+      lineEl.classList.add('in');
+      note(330+(3-n)*110,0,.22,'sine',.08);
+    }
+    showCount(3);
+    T(function(){ showCount(2); },beat);
+    T(function(){ showCount(1); },beat*2);
+    T(play,beat*3);
+  }
   function play(){
     gate.classList.add('gone');
     stage.classList.add('on');
@@ -613,7 +629,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       else { audioReady=true; songOn=false; }
     }catch(e){}
     chime();
-    play();
+    countIn();
     soundcheck.hidden=true;
   }
   var env=document.getElementById('envelope');
