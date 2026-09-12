@@ -148,22 +148,27 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   radial-gradient(circle at 34% 9%,rgba(255,255,255,.9) 0 3px,transparent 6px),
   radial-gradient(circle at 67% 12%,rgba(204,255,51,.8) 0 3px,transparent 6px),
   radial-gradient(circle at 89% 22%,rgba(255,228,92,.9) 0 3px,transparent 5px)}
-.audience{position:absolute;inset:70px 0 64px;overflow:hidden;filter:blur(1.8px)}
-.fan{position:absolute;width:22px;height:32px;border-radius:50% 50% 38% 38%;background:var(--shirt);opacity:.72;
-  transform:translate(-50%,-50%) scale(var(--scale));box-shadow:0 -12px 0 -4px var(--skin)}
+.audience{position:absolute;inset:52px 10px 72px;display:flex;flex-direction:column;justify-content:space-around;
+  perspective:700px;overflow:hidden}
+.audience-row{height:16%;display:flex;align-items:flex-end;justify-content:center;gap:var(--gap);transform:scale(var(--scale));
+  transform-origin:center bottom;position:relative}
+.audience-row::after{content:"";position:absolute;left:4%;right:4%;bottom:-8px;height:13px;border-radius:8px 8px 2px 2px;
+  background:linear-gradient(#563077,#21102f);box-shadow:inset 0 2px rgba(255,255,255,.12),0 5px 8px rgba(0,0,0,.55);z-index:-1}
+.fan{position:relative;flex:0 0 25px;width:25px;height:34px;border-radius:50% 50% 34% 34%;background:var(--shirt);opacity:.66;
+  box-shadow:0 -13px 0 -4px var(--skin);filter:blur(var(--blur))}
 .fan::before,.fan::after{content:"";position:absolute;width:5px;height:27px;border-radius:5px;background:var(--skin);top:-18px;transform-origin:bottom}
-.fan::before{left:2px;transform:rotate(-32deg)}
-.fan::after{right:2px;transform:rotate(32deg)}
-.featured{position:absolute;left:50%;top:47%;width:min(58%,310px);transform:translate(-50%,-50%);z-index:4;filter:none}
-.featured .pair{display:flex;align-items:flex-end;justify-content:center;gap:0}
-.featured svg{width:48%;filter:drop-shadow(0 0 14px rgba(255,255,255,.4))}
-.featured .p1{animation:bop 1.05s ease-in-out infinite}
-.featured .p2{animation:bop 1.05s ease-in-out infinite .5s}
+.fan::before{left:2px;transform:rotate(-30deg)}
+.fan::after{right:2px;transform:rotate(30deg)}
+.featured-seat{position:relative;flex:0 0 112px;height:78px;margin:0 -8px;z-index:5}
+.featured-seat .pair{display:flex;align-items:flex-end;justify-content:center;position:absolute;left:0;right:0;bottom:-4px}
+.featured-seat svg{width:58px;filter:drop-shadow(0 0 10px rgba(255,255,255,.45))}
+.featured-seat .p1{animation:bop 1.05s ease-in-out infinite}
+.featured-seat .p2{animation:bop 1.05s ease-in-out infinite .5s}
 @keyframes bop{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(2deg)}}
-.us-marker{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;
-  font-family:var(--display);font-size:clamp(18px,5vw,28px);color:var(--lime);white-space:nowrap;text-shadow:0 3px 0 #111;
+.us-marker{position:absolute;left:50%;bottom:82px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;
+  font-family:var(--display);font-size:clamp(14px,4vw,21px);color:var(--lime);white-space:nowrap;text-shadow:0 3px 0 #111;
   animation:point 1s ease-in-out infinite}
-.us-marker::after{content:"↓";font-family:var(--body);font-size:42px;line-height:.8;color:var(--pink)}
+.us-marker::after{content:"↓";font-family:var(--body);font-size:32px;line-height:.8;color:var(--pink)}
 @keyframes point{0%,100%{transform:translate(-50%,0) rotate(-2deg)}50%{transform:translate(-50%,-12px) rotate(2deg)}}
 .stage-edge{position:absolute;left:-5%;right:-5%;bottom:-16px;height:100px;background:linear-gradient(#2f2440,#09070d 28%);
   border-top:5px solid #5c4c70;transform:perspective(300px) rotateX(18deg);box-shadow:0 -12px 28px rgba(0,0,0,.65)}
@@ -273,10 +278,6 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     <div class="arena" id="arena">
       <div class="venue-lights"></div>
       <div class="audience" id="audience"></div>
-      <div class="featured" id="featured">
-        <div class="us-marker">THAT'S US</div>
-        <div class="pair" id="featuredPair"></div>
-      </div>
       <div class="phones" id="phones"></div>
       <div class="stage-edge"></div>
     </div>
@@ -379,21 +380,32 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   var audience=document.getElementById('audience');
   var shirts=['#ff3d9a','#ccff33','#8b3dff','#ffe45c','#4de3ff','#fff4e6'];
   var skins=['#f7cfae','#d49a78','#8f5c45','#f1bd91','#6d4437'];
-  for(var f=0;f<110;f++){
-    var fan=document.createElement('i');
-    var depth=Math.random();
-    fan.className='fan';
-    fan.style.left=(2+Math.random()*96)+'%';
-    fan.style.top=(4+depth*92)+'%';
-    fan.style.setProperty('--scale',(0.38+depth*0.95).toFixed(2));
-    fan.style.setProperty('--shirt',shirts[f%shirts.length]);
-    fan.style.setProperty('--skin',skins[(f*3)%skins.length]);
-    fan.style.zIndex=Math.floor(depth*10);
-    audience.appendChild(fan);
-  }
-  document.getElementById('featuredPair').innerHTML=
-    person(mk(SAM,{shirt:'#ff3d9a',left:{up:true,hold:'phone'},right:{up:true,hold:'glow'}}))+
-    person(mk(ADDIE,{shirt:'#ccff33',left:{up:true,hold:'glow'},right:{up:true,hold:'phone'}}));
+  var rowCounts=[7,9,11,13,15], fanIndex=0;
+  rowCounts.forEach(function(count,rowIndex){
+    var row=document.createElement('div');
+    row.className='audience-row';
+    row.style.setProperty('--scale',(0.62+rowIndex*0.13).toFixed(2));
+    row.style.setProperty('--gap',Math.max(5,11-rowIndex)+'px');
+    for(var seat=0;seat<count;seat++){
+      if(rowIndex===2 && seat===Math.floor(count/2)){
+        var featured=document.createElement('div');
+        featured.className='featured-seat';
+        featured.innerHTML='<div class="us-marker">THAT\'S US</div><div class="pair">'+
+          person(mk(SAM,{shirt:'#ff3d9a',left:{up:true,hold:'phone'},right:{up:true,hold:'glow'}}))+
+          person(mk(ADDIE,{shirt:'#ccff33',left:{up:true,hold:'glow'},right:{up:true,hold:'phone'}}))+'</div>';
+        row.appendChild(featured);
+        continue;
+      }
+      var fan=document.createElement('i');
+      fan.className='fan';
+      fan.style.setProperty('--shirt',shirts[fanIndex%shirts.length]);
+      fan.style.setProperty('--skin',skins[(fanIndex*3)%skins.length]);
+      fan.style.setProperty('--blur',(1.8-rowIndex*0.25).toFixed(2)+'px');
+      row.appendChild(fan);
+      fanIndex++;
+    }
+    audience.appendChild(row);
+  });
   var ph=document.getElementById('phones');
   for(var p=0;p<38;p++){
     var dot=document.createElement('i');
