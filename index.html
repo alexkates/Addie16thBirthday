@@ -155,10 +155,12 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 .audience-row::after{content:"";position:absolute;left:4%;right:4%;bottom:-8px;height:13px;border-radius:8px 8px 2px 2px;
   background:linear-gradient(#563077,#21102f);box-shadow:inset 0 2px rgba(255,255,255,.12),0 5px 8px rgba(0,0,0,.55);z-index:-1}
 .fan{position:relative;flex:0 0 25px;width:25px;height:34px;border-radius:50% 50% 34% 34%;background:var(--shirt);opacity:.66;
-  box-shadow:0 -13px 0 -4px var(--skin);filter:blur(var(--blur))}
+  box-shadow:0 -13px 0 -4px var(--skin);filter:blur(var(--blur));transform-origin:center bottom;
+  animation:crowddance var(--tempo) ease-in-out var(--delay) infinite alternate}
 .fan::before,.fan::after{content:"";position:absolute;width:5px;height:27px;border-radius:5px;background:var(--skin);top:-18px;transform-origin:bottom}
 .fan::before{left:2px;transform:rotate(-30deg)}
 .fan::after{right:2px;transform:rotate(30deg)}
+@keyframes crowddance{from{transform:translateY(2px) rotate(0)}to{transform:translateY(-7px) rotate(var(--tilt))}}
 .featured-seat{position:relative;flex:0 0 112px;height:78px;margin:0 -8px;z-index:5}
 .featured-seat .pair{display:flex;align-items:flex-end;justify-content:center;position:absolute;left:0;right:0;bottom:-4px}
 .featured-seat svg{width:58px;filter:drop-shadow(0 0 10px rgba(255,255,255,.45))}
@@ -426,6 +428,9 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       fan.style.setProperty('--shirt',shirts[fanIndex%shirts.length]);
       fan.style.setProperty('--skin',skins[(fanIndex*3)%skins.length]);
       fan.style.setProperty('--blur',(1.8-rowIndex*0.25).toFixed(2)+'px');
+      fan.style.setProperty('--tempo',(0.72+(fanIndex%7)*0.1).toFixed(2)+'s');
+      fan.style.setProperty('--delay',(-0.12*(fanIndex%11)).toFixed(2)+'s');
+      fan.style.setProperty('--tilt',fanIndex%2?'5deg':'-5deg');
       row.appendChild(fan);
       fanIndex++;
     }
