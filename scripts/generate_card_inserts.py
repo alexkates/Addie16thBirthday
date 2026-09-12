@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode.qr import QrCodeWidget
 from reportlab.graphics.shapes import Drawing, Group, Rect
-from reportlab.lib.colors import HexColor, white
+from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import inch
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
@@ -16,15 +16,13 @@ PAGE = (5 * inch, 7 * inch)
 
 INK = HexColor("#150726")
 PINK = HexColor("#ff3d9a")
-LIME = HexColor("#ccff33")
 CREAM = HexColor("#fff4e6")
-TAPE = HexColor("#ffe45c")
 PURPLE = HexColor("#6b3fa0")
 
 
 def qr_drawing(size):
     drawing = Drawing(size, size)
-    drawing.add(Rect(0, 0, size, size, fillColor=white, strokeColor=None))
+    drawing.add(Rect(0, 0, size, size, fillColor=CREAM, strokeColor=None))
     widget = QrCodeWidget(URL)
     x0, y0, x1, y1 = widget.getBounds()
     scale = (size * 0.86) / max(x1 - x0, y1 - y0)
@@ -75,31 +73,17 @@ def draw_insert(path):
     c.setFillColor(CREAM)
     c.rect(0, 0, width, height, fill=1, stroke=0)
 
-    c.setStrokeColor(PURPLE)
-    c.setLineWidth(1.25)
-    c.roundRect(24, 24, width - 48, height - 48, 10, fill=0, stroke=1)
+    centered(c, "ADDIE", 398, "Helvetica-Bold", 42, PINK, 2)
+    centered(c, "The real present wouldn't", 359, "Helvetica", 11.5, PURPLE)
+    centered(c, "fit inside this card.", 342, "Helvetica", 11.5, PURPLE)
 
-    centered(c, "SWEET SIXTEEN", height - 62, "Courier-Bold", 9, PURPLE, 2)
-    centered(c, "ADDIE", height - 119, "Helvetica-Bold", 42, INK, 3)
-
-    c.setStrokeColor(PINK)
-    c.setLineWidth(3)
-    c.line(width / 2 - 23, height - 139, width / 2 + 23, height - 139)
-
-    centered(c, "The real present wouldn't", 348, "Helvetica", 12, INK)
-    centered(c, "fit inside this card.", 331, "Helvetica", 12, INK)
-
-    qr_size = 160
+    qr_size = 150
     qr_x = (width - qr_size) / 2
-    qr_y = 137
-    c.setFillColor(white)
-    c.setStrokeColor(INK)
-    c.setLineWidth(1)
-    c.roundRect(qr_x - 9, qr_y - 9, qr_size + 18, qr_size + 18, 6, fill=1, stroke=1)
+    qr_y = 159
     renderPDF.draw(qr_drawing(qr_size), c, qr_x, qr_y)
 
-    centered(c, "SCAN FOR YOUR PRESENT", 108, "Courier-Bold", 9, PINK, 1.2)
-    centered(c, "Love, Aunt Sam + Uncle Alex", 67, "Helvetica-Oblique", 11, PURPLE)
+    centered(c, "SCAN FOR YOUR GIFT", 132, "Courier-Bold", 9, PINK, 1.4)
+    centered(c, "Love, Aunt Sam + Uncle Alex", 79, "Helvetica-Oblique", 10.5, PURPLE)
 
     c.showPage()
     c.save()
