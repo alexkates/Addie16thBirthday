@@ -59,6 +59,7 @@ canvas#confetti{position:fixed;inset:0;z-index:60;pointer-events:none}
 .soundcheck{position:fixed;inset:0;z-index:79;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:18px;padding:28px;text-align:center;background:var(--ink);opacity:0;visibility:hidden;transition:opacity .45s ease}
 .soundcheck.on{opacity:1;visibility:visible}
+.soundcheck[hidden]{display:none}
 .soundcheck h2{font-family:var(--display);font-size:clamp(32px,10vw,64px);line-height:1.08;margin:0;max-width:12ch}
 .soundcheck p{font-family:var(--hand);font-size:clamp(25px,7vw,34px);color:#c9b6e6;margin:0;max-width:18ch}
 .sound-yes{margin-top:8px;background:var(--lime);color:var(--ink);border:3px solid #111;border-radius:99px;
@@ -567,13 +568,15 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     gate.classList.add('gone');
     stage.classList.add('on');
     var step=reduce?600:3000, at=0;
+    function showLine(L,i){
+      lineEl.className='line'; lineEl.innerHTML=L.t;
+      void lineEl.offsetWidth; lineEl.classList.add('in');
+      note(440+i*70,0,.18,'sine',.06);
+    }
     LINES.forEach(function(L,i){
       var start=at, dur=step+(reduce?0:(L.hold||0));
-      T(function(){
-        lineEl.className='line'; lineEl.innerHTML=L.t;
-        void lineEl.offsetWidth; lineEl.classList.add('in');
-        note(440+i*70,0,.18,'sine',.06);
-      }, start);
+      if(start===0) showLine(L,i);
+      else T(function(){ showLine(L,i); },start);
       if(L.sub){
         T(function(){
           var sp=document.createElement('span');
@@ -595,7 +598,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
     document.getElementById('soundcheck').classList.add('on');
   }
   function confirmSound(){
-    document.getElementById('soundcheck').classList.remove('on');
+    var soundcheck=document.getElementById('soundcheck');
     if(!ac&&AC){ try{ ac=new AC(); }catch(e){} }
     /* iOS creates a fresh AudioContext suspended even inside a real tap; it has
        to be resumed in the same gesture or every oscillator plays silently */
@@ -610,7 +613,8 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       else { audioReady=true; songOn=false; }
     }catch(e){}
     chime();
-    T(play,420);
+    play();
+    soundcheck.hidden=true;
   }
   var env=document.getElementById('envelope');
   env.addEventListener('click',open);
