@@ -68,109 +68,45 @@ def centered(c, text, y, font, size, color, tracking=0):
         c.drawCentredString(PAGE[0] / 2, y, text)
 
 
-def flower(c, x, y, radius, color):
-    c.setFillColor(color)
-    for dx, dy in ((0, radius), (radius, 0), (0, -radius), (-radius, 0)):
-        c.circle(x + dx, y + dy, radius * 0.62, fill=1, stroke=0)
-    c.setFillColor(CREAM)
-    c.circle(x, y, radius * 0.42, fill=1, stroke=0)
-
-
-def striped_frame(c, x, y, width, height):
-    c.saveState()
-    path = c.beginPath()
-    path.rect(x, y, width, height)
-    c.clipPath(path, stroke=0)
-    colors = (PINK, LIME, CREAM)
-    c.setLineWidth(7)
-    index = 0
-    for offset in range(-int(height), int(width + height), 10):
-        c.setStrokeColor(colors[index % len(colors)])
-        c.line(x + offset, y, x + offset + height, y + height)
-        index += 1
-    c.restoreState()
-    c.setStrokeColor(INK)
-    c.setLineWidth(2)
-    c.roundRect(x, y, width, height, 8, fill=0, stroke=1)
-
-
-def draw_insert(path, dark):
-    bg = INK if dark else CREAM
-    fg = CREAM if dark else INK
-    muted = HexColor("#d8c8ed") if dark else PURPLE
+def draw_insert(path):
     c = canvas.Canvas(str(path), pagesize=PAGE)
     width, height = PAGE
-    c.setFillColor(bg)
+    c.setTitle("Addie's 16th birthday card insert")
+    c.setFillColor(CREAM)
     c.rect(0, 0, width, height, fill=1, stroke=0)
 
-    c.setStrokeColor(LIME if dark else PURPLE)
-    c.setLineWidth(1.5)
-    c.roundRect(18, 18, width - 36, height - 36, 12, fill=0, stroke=1)
+    c.setStrokeColor(PURPLE)
+    c.setLineWidth(1.25)
+    c.roundRect(24, 24, width - 48, height - 48, 10, fill=0, stroke=1)
 
-    centered(c, "SPECIAL DELIVERY  /  BIRTHDAY NO. 16", height - 49, "Courier-Bold", 8.5, LIME if dark else PURPLE, 1.15)
-    centered(c, "ADDIE", height - 118, "Helvetica-Bold", 46, fg, 3)
-    centered(c, "this one would not fit", height - 146, "Helvetica-Oblique", 11.5, muted)
-    centered(c, "in an envelope.", height - 161, "Helvetica-Oblique", 11.5, muted)
+    centered(c, "SWEET SIXTEEN", height - 62, "Courier-Bold", 9, PURPLE, 2)
+    centered(c, "ADDIE", height - 119, "Helvetica-Bold", 42, INK, 3)
 
-    flower(c, 42, height - 92, 5, PINK)
-    flower(c, width - 43, height - 155, 4, LIME)
-    flower(c, width - 54, 55, 4, PINK)
+    c.setStrokeColor(PINK)
+    c.setLineWidth(3)
+    c.line(width / 2 - 23, height - 139, width / 2 + 23, height - 139)
 
-    stamp_x, stamp_y = width - 83, height - 85
-    c.saveState()
-    c.translate(stamp_x, stamp_y)
-    c.rotate(7)
-    c.setFillColor(PINK)
+    centered(c, "The real present wouldn't", 348, "Helvetica", 12, INK)
+    centered(c, "fit inside this card.", 331, "Helvetica", 12, INK)
+
+    qr_size = 160
+    qr_x = (width - qr_size) / 2
+    qr_y = 137
+    c.setFillColor(white)
     c.setStrokeColor(INK)
-    c.setLineWidth(2)
-    c.circle(0, 0, 26, fill=1, stroke=1)
-    c.setFillColor(CREAM)
-    c.setFont("Helvetica-Bold", 24)
-    c.drawCentredString(0, -5, "16")
-    c.setFont("Courier-Bold", 5)
-    c.drawCentredString(0, -15, "VIP")
-    c.restoreState()
-
-    panel_x, panel_y = 34, 116
-    panel_w, panel_h = width - 68, 214
-    striped_frame(c, panel_x, panel_y, panel_w, panel_h)
-    c.setFillColor(CREAM if dark else INK)
-    c.roundRect(panel_x + 7, panel_y + 7, panel_w - 14, panel_h - 14, 5, fill=1, stroke=0)
-
-    qr_size = 128
-    qr_x = panel_x + 18
-    qr_y = panel_y + 42
+    c.setLineWidth(1)
+    c.roundRect(qr_x - 9, qr_y - 9, qr_size + 18, qr_size + 18, 6, fill=1, stroke=1)
     renderPDF.draw(qr_drawing(qr_size), c, qr_x, qr_y)
 
-    copy_color = INK if dark else CREAM
-    copy_x = qr_x + qr_size + 13
-    c.setFillColor(PINK if dark else LIME)
-    c.setFont("Courier-Bold", 10)
-    c.drawString(copy_x, panel_y + 164, "SCAN THIS")
-    c.setFillColor(copy_color)
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(copy_x, panel_y + 139, "YOUR")
-    c.drawString(copy_x, panel_y + 124, "PRESENT")
-    c.drawString(copy_x, panel_y + 109, "IS WAITING.")
-    c.setFont("Helvetica", 9)
-    c.drawString(copy_x, panel_y + 80, "phone up.")
-    c.drawString(copy_x, panel_y + 66, "sound up.")
-    c.drawString(copy_x, panel_y + 52, "no spoilers.")
-
-    c.setFillColor(copy_color)
-    c.setFont("Courier", 5.5)
-    c.drawCentredString(width / 2, panel_y + 20, "alexkates.github.io/")
-    c.drawCentredString(width / 2, panel_y + 12, "Addie16thBirthday")
-
-    centered(c, "LOVE, AUNT SAM + UNCLE ALEX", 79, "Courier-Bold", 12, PINK, 1)
-    centered(c, "tap the envelope when you get there.", 57, "Helvetica-Oblique", 10, muted)
+    centered(c, "SCAN FOR YOUR PRESENT", 108, "Courier-Bold", 9, PINK, 1.2)
+    centered(c, "Love, Aunt Sam + Uncle Alex", 67, "Helvetica-Oblique", 11, PURPLE)
 
     c.showPage()
     c.save()
 
 
 def main():
-    draw_insert(ROOT / "card-insert-cream.pdf", dark=False)
+    draw_insert(ROOT / "card-insert-cream.pdf")
     save_qr_png(ROOT / "qr.png")
 
 
