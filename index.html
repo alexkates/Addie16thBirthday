@@ -551,14 +551,22 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
   var AC=window.AudioContext||window.webkitAudioContext, ac=null;
   function note(f,t,dur,type,vol){
     if(!ac) return;
-    if(ac.state==='suspended'){ try{ ac.resume(); }catch(e){} }
-    var o=ac.createOscillator(), g=ac.createGain();
-    o.type=type||'triangle'; o.frequency.value=f;
-    g.gain.setValueAtTime(0,ac.currentTime+t);
-    g.gain.linearRampToValueAtTime(vol||0.14,ac.currentTime+t+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+t+dur);
-    o.connect(g); g.connect(ac.destination);
-    o.start(ac.currentTime+t); o.stop(ac.currentTime+t+dur+0.05);
+    function schedule(){
+      var o=ac.createOscillator(), g=ac.createGain(), now=ac.currentTime;
+      o.type=type||'triangle'; o.frequency.value=f;
+      g.gain.setValueAtTime(0,now+t);
+      g.gain.linearRampToValueAtTime(vol||0.14,now+t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,now+t+dur);
+      o.connect(g); g.connect(ac.destination);
+      o.start(now+t); o.stop(now+t+dur+0.05);
+    }
+    if(ac.state==='running') schedule();
+    else {
+      try{
+        var resumed=ac.resume();
+        if(resumed&&resumed.then) resumed.then(schedule).catch(function(){});
+      }catch(e){}
+    }
   }
   function chime(){ [784,988,1319].forEach(function(f,i){ note(f,i*0.09,.45); }); }
   /* the AudioContext is opened by the tap, so this always sounds even when the
@@ -570,6 +578,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 
   /* ---------- sequence ---------- */
   var LINES=[
+    {t:"hi addie"},
     {t:"you are<br><em>sixteen</em>"},
     {t:"so obviously<br>we got you<br>a gift"},
     {t:"it is not<br>a sweater"},
