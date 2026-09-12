@@ -95,7 +95,7 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 @keyframes shake{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-2.5deg)}94%{transform:rotate(2.5deg)}97%{transform:rotate(-1.5deg)}}
 
 /* PLAYER */
-.player{max-width:660px;margin:0 auto;padding:0 20px}
+.player{display:none}
 .playbox{background:rgba(255,255,255,.06);border:2px solid #4a2f70;border-radius:18px;padding:14px;
   display:flex;align-items:center;gap:14px}
 .pp{flex:0 0 auto;width:60px;height:60px;border-radius:50%;border:3px solid #111;background:var(--lime);
@@ -127,6 +127,8 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 .t-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--display);font-size:13px;letter-spacing:.10em}
 .t-tour{font-weight:700;letter-spacing:.18em;font-size:13px;text-transform:uppercase;color:#6b3fa0;margin:14px 0 0}
 .t-act{font-family:var(--display);font-size:clamp(26px,8.2vw,44px);line-height:1;margin:6px 0 4px}
+.t-opener{font-family:var(--hand);font-size:24px;color:#6b3fa0;margin:7px 0 0}
+.t-venue{font-family:var(--display);font-size:clamp(14px,4.2vw,19px);line-height:1.2;margin:0;text-align:center}
 .t-rule{border:none;border-top:2px dashed #b9a8d6;margin:16px 0}
 .t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .t-lab{font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:#8b6fb5;margin:0 0 3px}
@@ -134,6 +136,11 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 .barcode{margin-top:16px;height:46px;border-radius:3px;
   background:repeating-linear-gradient(90deg,#1a0b2e 0 2px,transparent 2px 4px,#1a0b2e 4px 7px,transparent 7px 9px,#1a0b2e 9px 10px,transparent 10px 14px)}
 .t-fine{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8b6fb5;text-align:center;margin:8px 0 0}
+.tour-script{position:relative;width:max-content;max-width:90%;margin:16px auto 0;font-family:var(--hand);font-size:clamp(34px,10vw,58px);
+  line-height:.9;color:var(--pink);transform:rotate(-3deg);text-align:center}
+.tour-script::before,.tour-script::after{position:absolute;font-size:.65em;color:var(--pink)}
+.tour-script::before{content:"✿";left:-1.15em;top:-.35em}
+.tour-script::after{content:"✿";right:-1em;bottom:-.4em}
 
 /* COUNTDOWN */
 .count-head{text-align:center;font-family:var(--display);color:var(--pink);font-size:15px;letter-spacing:.12em;margin-bottom:18px}
@@ -241,9 +248,10 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
 <main id="main">
 
   <section>
-    <p class="kicker">NOVEMBER 7 &nbsp;•&nbsp; YOU + AUNT SAM</p>
+    <p class="kicker">NOVEMBER 7, 2026 &nbsp;•&nbsp; PHILADELPHIA</p>
     <h2 class="bigname"><span class="shake">OLIVIA<br>RODRIGO</span></h2>
-    <p class="subline">yes, really. the tickets are bought. this is the actual gift.</p>
+    <p class="tour-script">the unraveled tour</p>
+    <p class="subline">you + aunt sam. xfinity mobile arena. 7:00 pm. devon again opens.</p>
   </section>
 
   <div class="player">
@@ -263,19 +271,22 @@ section{padding:56px 20px;max-width:660px;margin:0 auto}
       <div class="bulbs top"></div>
       <div class="bulbs bot"></div>
       <div class="t-top"><span>ADMIT TWO</span><span>NO. 016</span></div>
-      <p class="t-tour">Live in concert</p>
+      <p class="t-tour">The Unraveled Tour</p>
       <h3 class="t-act">OLIVIA<br>RODRIGO</h3>
+      <p class="t-opener">with Devon Again</p>
       <hr class="t-rule">
       <div class="t-grid">
-        <div><p class="t-lab">Date</p><p class="t-val">NOV 7</p></div>
-        <div><p class="t-lab">Guest</p><p class="t-val">ADDIE</p></div>
-        <div><p class="t-lab">Chaperone</p><p class="t-val">AUNT SAM</p></div>
+        <div><p class="t-lab">Date</p><p class="t-val">NOV 7, 2026</p></div>
+        <div><p class="t-lab">Time</p><p class="t-val">7:00 PM</p></div>
+        <div><p class="t-lab">City</p><p class="t-val">PHILLY</p></div>
       </div>
       <hr class="t-rule">
+      <p class="t-venue">XFINITY MOBILE ARENA</p>
+      <hr class="t-rule">
       <div class="t-grid">
-        <div><p class="t-lab">Section</p><p class="t-val">LOUD</p></div>
-        <div><p class="t-lab">Row</p><p class="t-val">SINGING</p></div>
-        <div><p class="t-lab">Seat</p><p class="t-val">EVERY WORD</p></div>
+        <div><p class="t-lab">Section</p><p class="t-val">C2</p></div>
+        <div><p class="t-lab">Row</p><p class="t-val">4</p></div>
+        <div><p class="t-lab">Seat</p><p class="t-val">14</p></div>
       </div>
       <div class="barcode"></div>
       <p class="t-fine">Non-refundable • Voice loss not covered</p>
